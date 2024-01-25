@@ -20,4 +20,9 @@ class Task extends Model
     {
         return $this->belongsToMany(Category::class); // Resolved through task_user
     }
+
+    public function comments() 
+    {
+        return $this->hasMany(Comment::class);
+    }
 }

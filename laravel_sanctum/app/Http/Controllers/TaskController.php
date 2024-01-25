@@ -12,7 +12,7 @@ class TaskController extends Controller
 {
     // Database Connection Issue:
     // If there's a problem connecting to the database, Laravel might throw a PDOException or a similar exception.
-   public function getTask(Request $request) {
+   public function getTasks(Request $request) {
         $task = Task::all();
         return response()->json($task);
    }  
@@ -95,8 +95,8 @@ class TaskController extends Controller
         }   
     }
 
-    public function addAssignee(Request $request) {
-        $taskId = $request->input('task_id');
+    public function addAssignee(Request $request, $id) {
+        $taskId = $id;
         $userId = $request->input('user_id', []);
         
         $task = Task::find($taskId); 
@@ -127,4 +127,41 @@ class TaskController extends Controller
         return response()->json(['task_id'=> $taskId,'category_id'=> $categoryId]); 
     }
 
+    public function searchTaskByTitle(Request $request) 
+    {
+        $query = $request->input('query');
+        $task = Task::where('title','like','%'. $query .'%')->get();
+
+        if($task->isEmpty()){
+            return response()->json(['error'=> 'this title is not exist here'], 404);
+        }
+
+        return response()->json([$task], 200); 
+    }
+
+    public function searchTaskByDesc(Request $request) 
+    {
+        $query = $request->input('query');
+        $task = Task::where('description','like','%'. $query .'%')->get();
+
+        if($task->isEmpty()){
+            return response()->json(['error'=> 'this title is not exist here'], 404);
+        }
+
+        return response()->json([$task], 200); 
+    }
+
+    public function searchTaskByAssignee(Request $request) 
+    {
+        $userId = $request->input('user_id');
+        
+        $tasks = Task::whereHas('users', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })->with(['users' => function($query) use ($userId) {
+                $query->where('user_id', $userId)->select('name');
+            }])->get();
+    
+        return response()->json($tasks, 200); 
+    }
+    
 }
