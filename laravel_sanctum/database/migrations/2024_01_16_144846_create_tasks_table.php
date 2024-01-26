@@ -16,7 +16,7 @@ return new class extends Migration
             $table->timestamps();
             $table->string('title');
             $table->string('description')->nullable(); 
-            $table->timestamp('due_date')->nullable();
+            $table->date('due_date')->nullable();
             $table->integer('priority')->nullable();
             $table->string('status')->default('To Do');  
             $table->unsignedBigInteger('reporter_id');       

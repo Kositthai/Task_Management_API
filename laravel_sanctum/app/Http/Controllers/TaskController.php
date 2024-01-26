@@ -154,14 +154,39 @@ class TaskController extends Controller
     public function searchTaskByAssignee(Request $request) 
     {
         $userId = $request->input('user_id');
-        
+    
         $tasks = Task::whereHas('users', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            })->with(['users' => function($query) use ($userId) {
-                $query->where('user_id', $userId)->select('name');
-            }])->get();
+            $query->where('user_id', $userId);
+        })->with(['users' => function($query) use ($userId) {
+            $query->where('user_id', $userId)->select('name');
+        }])->get();
     
         return response()->json($tasks, 200); 
     }
     
+
+    public function filterTaskByDate(Request $request) 
+    {
+
+        $tasks = Task::where('due_date', $request->input('due_date'))->get();
+
+        return response()->json($tasks, 200); 
+    }
+
+    public function filterTaskByPriority(Request $request) 
+    {
+
+        $tasks = Task::where('priority', $request->input('priority'))->get();
+
+        return response()->json($tasks, 200); 
+    }
+
+    public function filterTaskByStatus(Request $request) 
+    {
+
+        $tasks = Task::where('status', $request->input('status'))->get();
+
+        return response()->json($tasks, 200); 
+    }
+
 }

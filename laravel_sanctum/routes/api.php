@@ -34,10 +34,15 @@ Route::delete('/task', [TaskController::class,'deleteTask']);
 Route::put('/task/{id}/assignee', [TaskController::class, 'addAssignee']); 
 Route::put('/task/{id}/category', [TaskController::class,'addCategory']);
 
-// Additional routes for specific actions
+// Task with search functionalities endpoints
 Route::get('/task/search/title', [TaskController::class,'searchTaskByTitle']);
 Route::get('/task/search/desc', [TaskController::class,'searchTaskByDesc']);
 Route::get('/task/search/assignee', [TaskController::class,'searchTaskByAssignee']);
+
+// Task with filtering fucntionalities endpoints
+Route::get('/task/filter/date', [TaskController::class,'filterTaskByDate']);
+Route::get('/task/filter/priority', [TaskController::class,'filterTaskByPriority']);
+Route::get('/task/filter/status', [TaskController::class,'filterTaskByStatus']);
 
 // Categories endpoints
 Route::get('/categories', [CategoryController::class, 'getTaskByCategoryId']); 

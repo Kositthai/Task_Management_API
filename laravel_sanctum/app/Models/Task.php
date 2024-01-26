@@ -11,11 +11,13 @@ class Task extends Model
 
     protected $fillable = ['title', 'description', 'due_date', 'priority', 'status', 'reporter_id']; 
 
+    protected $hidden = ['pivot'];
+
     public function users()
     {
-        return $this->belongsToMany(User::class); // Resolved through task_user
+        return $this->belongsToMany(User::class); 
     }
-
+    
     public function categories() 
     {
         return $this->belongsToMany(Category::class); // Resolved through task_user

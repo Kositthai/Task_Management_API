@@ -20,9 +20,9 @@ class TaskFactory extends Factory
         return [
             "title" => $this->faker->sentence(),
             "description"=> $this->faker->paragraph(),
-            "due_date"=> $this->faker->dateTime(),
+            "due_date"=> today(),
             "priority"=> $this->faker->numberBetween("1", "5"),
-           "reporter_id" => User::inRandomOrder()->first()->id,
+            "reporter_id" => User::inRandomOrder()->first()->id,
         ];
     }
 }
