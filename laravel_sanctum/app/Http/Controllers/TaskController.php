@@ -12,6 +12,7 @@ class TaskController extends Controller
 {
     // Database Connection Issue:
     // If there's a problem connecting to the database, Laravel might throw a PDOException or a similar exception.
+
    public function getTasks(Request $request) {
         $task = Task::all();
         return response()->json($task);
@@ -189,4 +190,11 @@ class TaskController extends Controller
         return response()->json($tasks, 200); 
     }
 
+  
+    public function paginateTask() 
+    {
+        $tasks = Task::paginate(5); 
+       
+        return response()->json($tasks, 200);
+    }
 }
