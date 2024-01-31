@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException; 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Traits\ValidateFieldsTrait;
 
 class TakController extends Controller
 {
+
+    use ValidateFieldsTrait;
     /**
      * Display a listing of the resource.
      */
@@ -56,17 +59,14 @@ class TakController extends Controller
                 return response()->json($validator->errors(),422);
             }
 
-            # this code used to check if user trying to add unexpected fields when submit the form? 
-            # the code used array_keys to get the keys of request body and using contains method to check if requestField is contains field (allowedFields) 
-            # if found unexpected field inside requestField return true otherwise false 
+
             $allowedFields = ['title','description','due_date','priority','reporter_id','status'];
-            $requestFields = collect(array_keys($request->all()));
-            $containsUnexpectedFields = $requestFields->contains(function ($field) use ($allowedFields) {
-                return !in_array($field, $allowedFields);
-            });
             
-            if ($containsUnexpectedFields) {
-                return response()->json(['error' => 'Unexpected fields detected.'], 422);
+
+            $validationResult = $this->validationFields($request, $allowedFields);
+
+            if($validationResult !== null) {
+                return $validationResult;
             }
 
             $task = new Task();
@@ -125,6 +125,16 @@ class TakController extends Controller
                 'priority' => ['nullable', 'integer'],
                 'status' => ['nullable', 'string', Rule::in(['To Do', 'In Progress', 'Done'])],         
             ]);
+
+            $allowedFields = ['title','description','due_date','priority','reporter_id','status'];
+            $requestFields = collect(array_keys($request->all()));
+            $containsUnexpectedFields = $requestFields->contains(function ($field) use ($allowedFields) {
+                return !in_array($field, $allowedFields);
+            });
+            
+            if ($containsUnexpectedFields) {
+                return response()->json(['error' => 'Unexpected fields detected.'], 422);
+            }
 
             $task = Task::findorfail($request->id);
         
