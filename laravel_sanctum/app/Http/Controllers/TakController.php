@@ -7,15 +7,22 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException; 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use App\Traits\ValidateFieldsTrait;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+
 
 class TakController extends Controller
 {
 
-    use ValidateFieldsTrait;
-    /**
-     * Display a listing of the resource.
-     */
+   
+/**
+    * @OA\Get(
+    *     path="/api/tasks",
+    *     summary="Get a list of tasks",
+    *     tags={"Tasks"},
+    *     @OA\Response(response=200, description="Successful operation"),
+    *     @OA\Response(response=500, description="Invalid request")
+    * )
+ */
     public function index()
     {
         try {
@@ -33,17 +40,11 @@ class TakController extends Controller
         }       
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+       
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         try {
@@ -57,16 +58,6 @@ class TakController extends Controller
 
             if( $validator->fails() ) {
                 return response()->json($validator->errors(),422);
-            }
-
-
-            $allowedFields = ['title','description','due_date','priority','reporter_id','status'];
-            
-
-            $validationResult = $this->validationFields($request, $allowedFields);
-
-            if($validationResult !== null) {
-                return $validationResult;
             }
 
             $task = new Task();
@@ -84,31 +75,22 @@ class TakController extends Controller
         } 
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $task = Task::find($id);
-
         if (!$task) {
             return response()->json(['error' => 'Task not found'], 404);
         }
-
         return response()->json($task);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+ 
     public function edit(string $id)
     {
-        //
+        
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    
     public function update(Request $request, string $id)
     {
         try {
@@ -126,16 +108,6 @@ class TakController extends Controller
                 'status' => ['nullable', 'string', Rule::in(['To Do', 'In Progress', 'Done'])],         
             ]);
 
-            $allowedFields = ['title','description','due_date','priority','reporter_id','status'];
-            $requestFields = collect(array_keys($request->all()));
-            $containsUnexpectedFields = $requestFields->contains(function ($field) use ($allowedFields) {
-                return !in_array($field, $allowedFields);
-            });
-            
-            if ($containsUnexpectedFields) {
-                return response()->json(['error' => 'Unexpected fields detected.'], 422);
-            }
-
             $task = Task::findorfail($request->id);
         
             $task->fill($request->only(['title', 'description', 'due_date', 'priority', 'status']));
@@ -147,11 +119,20 @@ class TakController extends Controller
         }   
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(string $id)
     {
-        //
+        try {
+            $task = Task::findOrFail($id);
+            $task->delete();
+
+            return response()->json(['message' => 'Delete task successfully'], 204);
+        } catch (ModelNotFoundException $exception) {
+            return response()->json([
+                'error' => 'Entry for ' . str_replace('App\\', '', $exception->getModel()) . ' not found'
+            ], 404);
+        } catch (\Exception $exception) {
+            return response()->json(['error' => 'Something went wrong'], 500);
+        }   
     }
 }

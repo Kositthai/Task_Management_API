@@ -3,8 +3,10 @@
 use App\Http\Controllers\AuthController; 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\TaskAssigneeController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TakController;
+use App\Http\Middleware\ValidateFields;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,27 +20,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // Authenication endpoint 
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Use POST to create a new task 
-    Route::post('/task', [TaskController::class,'addATask']);
+    // TaskAssignee Controller
+    Route::put('/task/{id}/assignee', [TaskAssigneeController::class, 'update']);
 
-    // Use GET to fetch all task or specific task by ID
-    Route::get('/task', [TaskController::class,'getTasks']);
-    Route::get('/task/{id}', [TaskController::class,'getTaskById']);
+    Route::get('/assignee/{id}', [TaskController::class, 'test']);
 
-    // Use PUT/PATCH to update a task by ID
-    Route::put('/task', [TaskController::class,'updateATask']);
-
-    // Use DELETE to delete a task by ID
-    Route::delete('/task', [TaskController::class,'deleteTask']);
-
-    // Task_User endpoints 
-    Route::put('/task/{id}/assignee', [TaskController::class, 'addAssignee']); 
+    Route::get('/task/search/assignee', [TaskController::class,'searchTaskByAssignee']); 
     Route::put('/task/{id}/category', [TaskController::class,'addCategory']);
 
     // Task with search functionalities endpoints
     Route::get('/task/search/title', [TaskController::class,'searchTaskByTitle']);
     Route::get('/task/search/desc', [TaskController::class,'searchTaskByDesc']);
-    Route::get('/task/search/assignee', [TaskController::class,'searchTaskByAssignee']);
+   
 
     // Task with filtering fucntionalities endpoints
     Route::get('/task/filter/date', [TaskController::class,'filterTaskByDate']);
@@ -52,15 +45,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/categories', [CategoryController::class, 'getTaskByCategoryId']); 
 
     // Comments endpoints
-    Route::post('/comment', [CommentController::class,'addComment']);
+ 
     Route::get('/comment/task/{taskId}', [CommentController::class,'getComment']);
 
-
-    Route::resource('tasks', TakController::class);
-   
 });
 
 
+Route::middleware(['auth:sanctum', 'validate.fields:title,description,due_date,priority,reporter_id,status'])->group(function () {
+    Route::resource('tasks', TakController::class);
+
+    Route::post('/comment', [CommentController::class,'addComment']);
+
+});
 
 
 // Authentication endpoints
