@@ -1,11 +1,11 @@
 <?php
 
+use App\Http\Controllers\AssigneeTaskController;
 use App\Http\Controllers\AuthController; 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
-use App\Http\Controllers\TaskAssigneeController;
 use App\Http\Controllers\TaskController;
-use App\Http\Controllers\TakController;
+use App\Http\Controllers\FilterSearchTaskController;
 use App\Http\Middleware\ValidateFields;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -15,49 +15,46 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
 Route::middleware('auth:sanctum')->group(function () {
     
     // Authenication endpoint 
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // TaskAssignee Controller
-    Route::put('/task/{id}/assignee', [TaskAssigneeController::class, 'update']);
-
-    Route::get('/assignee/{id}', [TaskController::class, 'test']);
-
-    Route::get('/task/search/assignee', [TaskController::class,'searchTaskByAssignee']); 
-    Route::put('/task/{id}/category', [TaskController::class,'addCategory']);
-
     // Task with search functionalities endpoints
-    Route::get('/task/search/title', [TaskController::class,'searchTaskByTitle']);
-    Route::get('/task/search/desc', [TaskController::class,'searchTaskByDesc']);
+    Route::get('/task/search/title', [FilterSearchTaskController::class,'searchTaskByTitle']);
+    Route::get('/task/search/desc', [FilterSearchTaskController::class,'searchTaskByDesc']);
+    Route::get('/task/search/assignee', [FilterSearchTaskController::class,'searchTaskByAssignee']); 
    
-
     // Task with filtering fucntionalities endpoints
-    Route::get('/task/filter/date', [TaskController::class,'filterTaskByDate']);
-    Route::get('/task/filter/priority', [TaskController::class,'filterTaskByPriority']);
-    Route::get('/task/filter/status', [TaskController::class,'filterTaskByStatus']);
+    Route::get('/task/filter/date', [FilterSearchTaskController::class,'filterTaskByDate']);
+    Route::get('/task/filter/priority', [FilterSearchTaskController::class,'filterTaskByPriority']);
+    Route::get('/task/filter/status', [FilterSearchTaskController::class,'filterTaskByStatus']);
 
     // Task pagination endpoint
-    Route::get('/task_lists', [TaskController::class,'paginateTask']);
-
-    // Categories endpoints
-    Route::get('/categories', [CategoryController::class, 'getTaskByCategoryId']); 
-
-    // Comments endpoints
- 
-    Route::get('/comment/task/{taskId}', [CommentController::class,'getComment']);
-
+    Route::get('/task_lists', [FilterSearchTaskController::class,'paginateTask']);
 });
 
 
 Route::middleware(['auth:sanctum', 'validate.fields:title,description,due_date,priority,reporter_id,status'])->group(function () {
-    Route::resource('tasks', TakController::class);
-
-    Route::post('/comment', [CommentController::class,'addComment']);
-
+    Route::resource('tasks', TaskController::class);
 });
 
+
+Route::middleware(['auth:sanctum', 'validate.fields:body,author_id,task_id'])->group(function () {
+    // Nested resource Comments 
+    Route::resource('tasks.comments', CommentController::class);
+});
+
+
+
+Route::middleware(['auth:sanctum', 'task_id'])->group(function () {
+    // Assignee endpoints
+     Route::resource('assignees', AssigneeTaskController::class);
+
+    // Categories endpoints
+    Route::resource('categories', CategoryController::class);
+ });
 
 // Authentication endpoints
 Route::post('/register', [AuthController::class,'register']);

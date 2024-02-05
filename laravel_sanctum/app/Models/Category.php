@@ -9,7 +9,7 @@ class Category extends Model
 {
     use HasFactory;
 
-    public function users() 
+    public function tasks()
     {
         return $this->belongsToMany(Task::class); // Resolved through task_user
     }

@@ -8,19 +8,31 @@ use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
-    public function getTaskByCategoryId(Request $request) { 
 
-      $userId = $request->input('user_id');
+  // getTaskByCategories 
+    public function show(Request $request, $id) 
+    {
+      $taskId = $request->input('task_id');
 
-      $task  = DB::table("tasks")
-      ->join('category_task', 'tasks.id', '=', 'category_task.task_id')
-      ->where('category_task.category_id', '=', $request->category_id)
-      ->where('reporter_id','=', $userId)
-      ->get(); 
-    
+      $task = Task::whereHas('categories', function ($query) use ($id) {
+        $query->where('category_id', $id);
+      })->where('id', $taskId)->get();
 
-       return response()->json([$task]);
-
-
+      return response()->json($task);
     }
+
+    public function update(Request $request, $id) { 
+      $categoryId = $id;
+      $taskId = $request->input('task_id');
+     
+      $task = Task::find($taskId);
+      
+      if(!$task) {
+          return response()->json(['error'=> 'Task not found'], 404);
+      }
+
+      $task->categories()->syncWithoutDetaching($categoryId);
+      return response()->json(['task_id'=> $taskId,'category_id'=> $categoryId], 200); 
+  }
+
 }
