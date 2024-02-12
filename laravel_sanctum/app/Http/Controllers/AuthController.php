@@ -8,9 +8,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-
 class AuthController extends Controller
 {
     use HttpResponses; 
@@ -37,12 +34,12 @@ class AuthController extends Controller
         $user = $request->user();
         $tokenResult = $user->createToken('Personal Access Token')->plainTextToken;
      
-
         return response()->json([
             'accessToken' =>$tokenResult,
             'token_type' => 'Bearer',
             ]);
-        }catch(ValidationException $exception){
+
+        } catch(ValidationException $exception){
             return response()->json(['error' => $exception ->errors()],401); #code 401 is unauthorized 
         }
     }
@@ -78,23 +75,5 @@ class AuthController extends Controller
         return response()->json(['message'=> 'Something went wrong', 'user' => $user], 500);
         }
     }
-
-    public function checkTokenRevocation(Request $request)
-    {
-        $userId = $request->user()->id;
-
-        // Check if there are any revoked tokens for the user
-        $revokedTokens = DB::table('personal_access_tokens')
-            ->where('tokenable_id', $userId)
-            ->where('revoked', 1)
-            ->count();
-
-        if ($revokedTokens > 0) {
-            return response()->json(['message' => 'Token has been revoked'], 200);
-        } else {
-            return response()->json(['message' => 'Token is active'], 200);
-        }
-    }
-
 
 }

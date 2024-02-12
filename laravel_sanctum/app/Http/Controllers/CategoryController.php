@@ -4,21 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Task;
-use Illuminate\Support\Facades\DB;
+
 
 class CategoryController extends Controller
 {
 
+  
   // getTaskByCategories 
-    public function show(Request $request, $id) 
+    public function show($id) 
     {
-      $taskId = $request->input('task_id');
+        $task = Task::whereHas('categories', function ($query) use ($id) {
+          $query->where('category_id', $id);
+        })->get();
 
-      $task = Task::whereHas('categories', function ($query) use ($id) {
-        $query->where('category_id', $id);
-      })->where('id', $taskId)->get();
-
-      return response()->json($task);
+        return response()->json($task);   
     }
 
     public function update(Request $request, $id) { 

@@ -6,7 +6,6 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\FilterSearchTaskController;
-use App\Http\Middleware\ValidateFields;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -48,9 +47,9 @@ Route::middleware(['auth:sanctum', 'validate.fields:body,author_id,task_id'])->g
 
 
 
-Route::middleware(['auth:sanctum', 'task_id'])->group(function () {
+Route::middleware(['auth:sanctum', 'validate.fields:task_id'])->group(function () {
     // Assignee endpoints
-     Route::resource('assignees', AssigneeTaskController::class);
+     Route::resource('assignees', AssigneeTaskController::class)->only(['show', 'update']);
 
     // Categories endpoints
     Route::resource('categories', CategoryController::class);

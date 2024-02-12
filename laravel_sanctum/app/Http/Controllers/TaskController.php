@@ -39,11 +39,6 @@ class TaskController extends Controller
         }       
     }
 
-    public function create()
-    {
-       
-    }
-
     public function store(Request $request)
     {
         try {
@@ -81,12 +76,6 @@ class TaskController extends Controller
             return response()->json(['error' => 'Task not found'], 404);
         }
         return response()->json($task);
-    }
-
- 
-    public function edit(string $id)
-    {
-        
     }
 
     
